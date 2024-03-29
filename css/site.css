@@ -36,6 +36,7 @@ hr {
   display: flex;
   justify-content: center;
   align-items: center;
+  text-transform: uppercase;
 }
 
 .correct {
@@ -96,7 +97,7 @@ hr {
   align-items: center;
 }
 
-/* #startBtn {
+#startBtn {
   padding: 15px 20px;
   border: 0;
   outline: 0;
@@ -110,4 +111,4 @@ hr {
 #startBtn:hover {
   cursor: pointer;
   text-decoration: underline;
-} */
+}

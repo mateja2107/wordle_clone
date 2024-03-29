@@ -6,6 +6,7 @@ let col = 0; // letter for attempt
 
 let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
+// let secretWord = "pince";
 
 document.getElementById("asd").innerHTML = secretWord;
 
@@ -45,20 +46,7 @@ function initialize() {
     }
 
     if (e.key === "Enter") {
-      let currTile = document.getElementById(`${row}-${col}`);
-      if (col == 4 && currTile.innerText != "") {
-        if (!readWord()) {
-          alert("word does not exists");
-          return;
-        }
-
-        if (gameOver) {
-          endGame();
-        }
-
-        row += 1;
-        col = 0;
-      }
+      onEnter();
     }
 
     if (e.key === "Backspace") {
@@ -112,6 +100,23 @@ function initialize() {
   }
 }
 
+function onEnter() {
+  let currTile = document.getElementById(`${row}-${col}`);
+  if (col == 4 && currTile.innerText != "") {
+    if (!readWord()) {
+      alert("word does not exists");
+      return;
+    }
+
+    if (gameOver) {
+      endGame();
+    }
+
+    row += 1;
+    col = 0;
+  }
+}
+
 // row je definisano gore, zbog toga nema argumenta
 function readWord() {
   let correct = 0;
@@ -155,22 +160,37 @@ function readWord() {
         key.classList.add("correct");
         letterTile.classList.add("correct");
         if (key.classList.contains("present")) key.classList.remove("present");
+      }
+    }
+  }
 
-        // ako rec sadrzi slovo ali slovo nije na odgovarajucem mestu
-      } else if (secretWord.includes(letter)) {
+  for (let i = 0; i < secretWord.length; i++) {
+    let letterTile = document.getElementById(`${row}-${i}`);
+    let letter = letterTile.textContent.toLocaleLowerCase();
+    let key = document.getElementById(`Key${letter.toUpperCase()}`);
+
+    // ako slovo nije oznaceno kao ispravno
+    if (!letterTile.classList.contains("correct")) {
+      // ako rec sadrzi slovo ali slovo nije na odgovarajucem mestu
+      if (secretWord.includes(letter) && wordObj[letter] > 0) {
         present += 1;
         wordObj[letter] -= 1;
 
         if (!key.classList.contains("correct")) key.classList.add("present");
         letterTile.classList.add("present");
+
+        // ako rec ne sadrzi slovo
+      } else {
+        absent += 1;
+
+        if (Array.from(letterTile.classList).length == 1) {
+          letterTile.classList.add("absent");
+        }
+
+        if (Array.from(key.classList).length == 1) {
+          key.classList.add("absent");
+        }
       }
-
-      // ako rec ne sadrzi slovo
-    } else {
-      absent += 1;
-
-      key.classList.add("absent");
-      letterTile.classList.add("absent");
     }
   }
 
@@ -185,3 +205,55 @@ function endGame() {
   if (typeof secretWord != "string") secretWord = secretWord.join("");
   document.querySelector("#answer").innerText = secretWord;
 }
+
+//! --------- SOLVE WORDLE AUTOMATICALLY ---------
+function solveWordle(feedBack = {}) {
+  if (Object.keys(feedBack) != 0) {
+    return ["s", "p", "e", "e", "d"];
+  }
+
+  return ["e", "x", "i", "s", "t"];
+}
+
+function bot(e, answer = solveWordle()) {
+  // row = 0; // attempt
+  // col = 0; // letter for attempt
+
+  console.log(answer);
+
+  for (let i = 0; i < answer.length; i++) {
+    setTimeout(() => {
+      let tile = document.getElementById(`${row}-${i}`);
+      tile.textContent = answer[i];
+      col = i;
+
+      // desava se posle petlje
+      if (i === answer.length - 1) {
+        console.log(row, col);
+        onEnter();
+        let data = document.querySelectorAll(`span[id*="${row - 1}-"]`);
+        data = Array.from(data);
+
+        let feedBack = {};
+        data.forEach((letter, i) => {
+          feedBack[`l${i}`] = [
+            letter.textContent,
+            Array.from(letter.classList)[1],
+          ];
+        });
+        answer = solveWordle(feedBack);
+
+        if (!gameOver) {
+          if (row != height) {
+            bot(e, answer);
+          } else {
+            endGame();
+          }
+        }
+      }
+    }, i * 500);
+  }
+}
+
+let button = document.getElementById("startBtn");
+button.addEventListener("click", bot);
