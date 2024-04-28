@@ -6,7 +6,7 @@ let col = 0; // letter for attempt
 
 let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
-// let secretWord = "pince";
+// let secretWord = "howff";
 
 document.getElementById("asd").innerHTML = secretWord;
 
@@ -197,7 +197,7 @@ function readWord() {
   // ako je rec pogodjena
   if (guessedWord.join("") === secretWord.join("")) return (gameOver = true);
 
-  console.log(correct, absent, present);
+  // console.log(correct, absent, present);
   return true;
 }
 
@@ -209,10 +209,33 @@ function endGame() {
 //! --------- SOLVE WORDLE AUTOMATICALLY ---------
 function solveWordle(feedBack = {}) {
   if (Object.keys(feedBack) != 0) {
-    return ["s", "p", "e", "e", "d"];
+    let guessedWord = getWord(feedBack);
+
+    guessedWord.forEach((letter, i) => {
+      if ((letter = feedBack[`l${i}`][0])) {
+        switch (feedBack[`l${i}`][1]) {
+          case "correct":
+            words = words.filter((word) => word.split("")[i] == letter);
+            break;
+          case "present":
+            words = words.filter(
+              (word) => word.split("")[i] != letter && word.includes(letter)
+            );
+            break;
+          case "absent":
+            words = words.filter((word) => word.split("")[i] != letter);
+            break;
+          default:
+            console.log("error");
+        }
+      } else {
+        console.log("delete everything");
+      }
+    });
   }
 
-  return ["e", "x", "i", "s", "t"];
+  console.log(words);
+  return getTheBestWord(words);
 }
 
 function bot(e, answer = solveWordle()) {
@@ -229,7 +252,7 @@ function bot(e, answer = solveWordle()) {
 
       // desava se posle petlje
       if (i === answer.length - 1) {
-        console.log(row, col);
+        // console.log(row, col);
         onEnter();
         let data = document.querySelectorAll(`span[id*="${row - 1}-"]`);
         data = Array.from(data);
@@ -257,3 +280,67 @@ function bot(e, answer = solveWordle()) {
 
 let button = document.getElementById("startBtn");
 button.addEventListener("click", bot);
+
+function getWord(obj) {
+  let word = [];
+  for (const [key, value] of Object.entries(obj)) {
+    word.push(value[0]);
+  }
+
+  return word;
+}
+
+function getTheBestWord(words) {
+  let bestWord = [];
+  let wordsObj, letter;
+
+  for (let i = 0; i < width; i++) {
+    wordsObj = filterWords(words);
+    letter = getMaxValue(wordsObj[`n${i}`]);
+
+    words = words.filter((word) => word.split("")[i] == letter);
+
+    bestWord.push(letter);
+  }
+
+  return bestWord;
+}
+
+function getMaxValue(obj) {
+  let maxKey = null;
+  let maxValue = 0;
+
+  for (const key in obj) {
+    if (obj[key] > maxValue) {
+      maxValue = obj[key];
+      maxKey = key;
+    }
+  }
+
+  return maxKey;
+}
+
+function filterWords(words) {
+  let wordObj = {
+    n0: {},
+    n1: {},
+    n2: {},
+    n3: {},
+    n4: {},
+  };
+
+  for (let i = 0; i < width; i++) {
+    words.forEach((word) => {
+      let letter = word.split("")[i];
+
+      let obj = wordObj[`n${i}`];
+      if (obj.hasOwnProperty(letter)) {
+        obj[letter] += 1;
+      } else {
+        obj[letter] = 1;
+      }
+    });
+  }
+
+  return wordObj;
+}
