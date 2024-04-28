@@ -242,7 +242,7 @@ function bot(e, answer = solveWordle()) {
   // row = 0; // attempt
   // col = 0; // letter for attempt
 
-  console.log(answer);
+  // console.log(answer);
 
   for (let i = 0; i < answer.length; i++) {
     setTimeout(() => {
