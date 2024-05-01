@@ -6,7 +6,7 @@ let col = 0; // letter for attempt
 
 let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
-// let secretWord = "howff";
+// let secretWord = "datum";
 
 document.getElementById("asd").innerHTML = secretWord;
 
@@ -136,15 +136,7 @@ function readWord() {
 
   // kreiranje objekta "speed" {s: 1, p: 1, e: 2, d: 1}
   // pomocu tog objekta kasnije odredjujem da li se slovo ponavlja
-  let wordObj = {};
-  for (let i = 0; i < secretWord.length; i++) {
-    let letter = secretWord[i];
-    if (wordObj[letter]) {
-      wordObj[letter] += 1;
-    } else {
-      wordObj[letter] = 1;
-    }
-  }
+  let wordObj = createObject(secretWord);
 
   for (let i = 0; i < secretWord.length; i++) {
     let letterTile = document.getElementById(`${row}-${i}`);
@@ -210,9 +202,10 @@ function endGame() {
 function solveWordle(feedBack = {}) {
   if (Object.keys(feedBack) != 0) {
     let guessedWord = getWord(feedBack);
+    let word = guessedWord.join("");
 
     guessedWord.forEach((letter, i) => {
-      if ((letter = feedBack[`l${i}`][0])) {
+      if (letter == feedBack[`l${i}`][0]) {
         switch (feedBack[`l${i}`][1]) {
           case "correct":
             words = words.filter((word) => word.split("")[i] == letter);
@@ -221,9 +214,14 @@ function solveWordle(feedBack = {}) {
             words = words.filter(
               (word) => word.split("")[i] != letter && word.includes(letter)
             );
+
             break;
           case "absent":
-            words = words.filter((word) => word.split("")[i] != letter);
+            if (countLetter(word, letter) < 2) {
+              words = words.filter((word) => !word.includes(letter));
+            } else {
+              words = words.filter((word) => word.split("")[i] != letter);
+            }
             break;
           default:
             console.log("error");
@@ -241,8 +239,6 @@ function solveWordle(feedBack = {}) {
 function bot(e, answer = solveWordle()) {
   // row = 0; // attempt
   // col = 0; // letter for attempt
-
-  // console.log(answer);
 
   for (let i = 0; i < answer.length; i++) {
     setTimeout(() => {
@@ -340,6 +336,31 @@ function filterWords(words) {
         obj[letter] = 1;
       }
     });
+  }
+
+  return wordObj;
+}
+
+function countLetter(word, letter) {
+  let count = 0;
+  for (let i = 0; i < word.length; i++) {
+    if (word[i] === letter) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function createObject(word) {
+  let wordObj = {};
+
+  for (let i = 0; i < word.length; i++) {
+    let letter = word[i];
+    if (wordObj[letter]) {
+      wordObj[letter] += 1;
+    } else {
+      wordObj[letter] = 1;
+    }
   }
 
   return wordObj;
