@@ -6,7 +6,7 @@ let col = 0; // letter for attempt
 
 let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
-// let secretWord = "datum";
+// let secretWord = "utter";
 
 document.getElementById("asd").innerHTML = secretWord;
 
@@ -211,9 +211,56 @@ function solveWordle(feedBack = {}) {
             words = words.filter((word) => word.split("")[i] == letter);
             break;
           case "present":
-            words = words.filter(
-              (word) => word.split("")[i] != letter && word.includes(letter)
-            );
+            if (countLetter(word, letter) > 1) {
+              let indexes = [];
+              let correctIndexes = [];
+
+              // indexes of 2 same present letter
+              for (let [key, value] of Object.entries(feedBack)) {
+                if (letter == value[0] && value[1] == "present") {
+                  indexes.push(key.split("")[1]);
+                } else if (letter == value[0] && value[1] == "correct") {
+                  correctIndexes.push(key.split("")[1]);
+                }
+              }
+              indexes = new Set(indexes);
+              indexes = [...indexes];
+
+              if (correctIndexes.length != 0) {
+                correctIndexes.forEach((index) => {
+                  words = words.filter(
+                    (word) =>
+                      word.split("")[index] == letter &&
+                      countLetter(word, letter) > 1
+                  );
+                });
+              }
+
+              if (indexes.length > 1) {
+                indexes.forEach((index) => {
+                  if (feedBack[`l${index}`][1] == "present") {
+                    correctIndexes[index] = index;
+                  }
+                });
+                console.log(correctIndexes);
+
+                indexes.forEach((index) => {
+                  words = words.filter(
+                    (word) =>
+                      word.split("")[index] != letter &&
+                      countLetter(word, letter) > 1
+                  );
+                });
+              } else {
+                words = words.filter(
+                  (word) => word.split("")[i] != letter && word.includes(letter)
+                );
+              }
+            } else {
+              words = words.filter(
+                (word) => word.split("")[i] != letter && word.includes(letter)
+              );
+            }
 
             break;
           case "absent":
