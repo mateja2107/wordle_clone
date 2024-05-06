@@ -6,9 +6,9 @@ let col = 0; // letter for attempt
 
 let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
-// let secretWord = "utter";
+// let secretWord = "state";
 
-document.getElementById("asd").innerHTML = secretWord;
+// document.getElementById("asd").innerHTML = secretWord;
 
 window.onload = () => initialize();
 
@@ -237,13 +237,6 @@ function solveWordle(feedBack = {}) {
               }
 
               if (indexes.length > 1) {
-                indexes.forEach((index) => {
-                  if (feedBack[`l${index}`][1] == "present") {
-                    correctIndexes[index] = index;
-                  }
-                });
-                console.log(correctIndexes);
-
                 indexes.forEach((index) => {
                   words = words.filter(
                     (word) =>
