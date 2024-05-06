@@ -8,7 +8,7 @@ let gameOver = false;
 let secretWord = words[Math.floor(Math.random() * words.length)];
 // let secretWord = "state";
 
-// document.getElementById("asd").innerHTML = secretWord;
+document.getElementById("asd").innerHTML = secretWord;
 
 window.onload = () => initialize();
 
